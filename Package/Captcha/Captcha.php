@@ -106,6 +106,14 @@ class Captcha
      * @see https://developers.google.com/recaptcha/docs/display
      */
     protected $size = 'normal';
+    
+    /**
+     * Forces the widget to render in a specific language. Auto-detects the user's language if unspecified.
+     *
+     * @see https://developers.google.com/recaptcha/docs/language
+     * @var string
+     */
+    protected $languageCode;
 
     /**
      * Optional tab index for input elements within the widget.
@@ -255,9 +263,19 @@ class Captcha
         if (!$this->getPublicKey()) {
             throw new Exception('You must set public key provided by reCaptcha');
         }
+        
+        /**
+         * JavaScript resource (api.js) parameters
+         * @see https://developers.google.com/recaptcha/docs/display#js_param
+         */
+        $jsParams = array();
+        if (!is_null($this->languageCode)) {
+            $jsParams['hl'] = $this->languageCode;
+        }
+        $jsParamsQuery = (string) !empty($jsParams) ? '?' . http_build_query($jsParams) : '';
 
         return
-            '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' .
+            '<script src="https://www.google.com/recaptcha/api.js' . $jsParamsQuery . '" async defer></script>' .
             '<div class="g-recaptcha" data-sitekey="' . $this->getPublicKey() . '" data-theme="' . $this->theme .
             '" data-type="' . $this->type . '" data-size="' . $this->size . '" data-tabIndex="' . $this->tabIndex .
             '"></div>';
@@ -407,6 +425,30 @@ class Captcha
         $this->size = (string)$size;
 
         return $this;
+    }
+
+    /**
+     * Set widget language code
+     * 
+     * @param string $languageCode
+     * @see https://developers.google.com/recaptcha/docs/language
+     * @return Captcha
+     */
+    public function setLanguageCode($languageCode)
+    {
+        $this->languageCode = $languageCode;
+        return $this;
+    }
+    
+    /**
+     * Get widget language code
+     * 
+     * @see https://developers.google.com/recaptcha/docs/language
+     * @return string
+     */
+    public function getLanguageCode()
+    {
+        return $this->languageCode;
     }
 
     /**
